@@ -4,8 +4,8 @@
 # Specify Vagrant version, Vagrant API version, and desired clone location
 Vagrant.require_version '>= 1.6.0'
 VAGRANTFILE_API_VERSION = '2'
-ENV['VAGRANT_DEFAULT_PROVIDER'] = 'vmware_fusion'
-ENV['VAGRANT_VMWARE_CLONE_DIRECTORY'] = '~/.vagrant'
+#ENV['VAGRANT_DEFAULT_PROVIDER'] = 'vmware_fusion'
+#ENV['VAGRANT_VMWARE_CLONE_DIRECTORY'] = '~/.vagrant'
 
 # Require 'yaml' module
 require 'yaml'
@@ -48,6 +48,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           vmw.vmx['vhv.enable'] = 'TRUE'
         end #if machine['nested']
       end # srv.vm.provider vmware_fusion
+
+      # Configure CPU & RAM per settings in machines.yml (Virtualbox)
+      srv.vm.provider "virtualbox" do |vbox|
+        vbox.memory = machine['ram']
+        vbox.cpus = machine['vcpu']
+        if machine['nested'] == true
+           vbox.customize [ 'modifyvm', :id, '--nestedpaging', "on" ]
+        end #if machine['nested']
+      end # srv.vm.provider 
 
       # Provision the VM with Ansible if enabled in machines.yml
       if machine['provision'] != nil
